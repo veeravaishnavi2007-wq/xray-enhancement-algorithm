@@ -1,0 +1,34 @@
+import cv2
+import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class MultiScaleContrastEnhancementModule:
+    """Improves visibility using CLAHE (Contrast Limited Adaptive Histogram Equalization)."""
+    
+    @staticmethod
+    def apply_multi_scale_contrast(image: np.ndarray) -> np.ndarray:
+        """
+        Apply multi-scale contrast enhancement using CLAHE and morphological operations.
+        
+        Args:
+            image: Input image
+            
+        Returns:
+            Contrast-enhanced image
+        """
+        # Apply CLAHE for adaptive contrast enhancement
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(image)
+        
+        # Apply second pass with different tile size for multi-scale effect
+        clahe_fine = cv2.createCLAHE(clipLimit=1.5, tileGridSize=(16, 16))
+        enhanced = clahe_fine.apply(enhanced)
+        
+        # Normalize to full range
+        enhanced = cv2.normalize(enhanced, None, 0, 255, cv2.NORM_MINMAX)
+        
+        logger.info("Multi-scale contrast enhancement applied")
+        return enhanced.astype(np.uint8)
